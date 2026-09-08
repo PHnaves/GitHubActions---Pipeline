@@ -1,4 +1,4 @@
-package com.phnaves.pipeline;
+package com.phnaves;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class CalculadoraTest {
+class CalculatorTest {
 
-    private final Calculadora calc = new Calculadora();
+    private final Calculator calc = new Calculator();
 
     @Test
     @DisplayName("soma de dois positivos")

@@ -64,7 +64,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.phnaves.main</mainClass>
+                            <mainClass>com.phnaves.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
