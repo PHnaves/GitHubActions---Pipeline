@@ -47,6 +47,14 @@ jobs:
       - name: Message after List content
         run: echo "Hello World"
 
+      - name: Get last commit
+        run: |
+          echo "Hash:"
+          git log -1 --format='%H'
+
+          echo "Títle:"
+          git log -1 --format='%s'
+
       - name: List content
         if: github.ref == 'refs/heads/main'
         run: echo "$APP_NAME"
