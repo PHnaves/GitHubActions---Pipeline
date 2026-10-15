@@ -22,7 +22,7 @@ jobs:
     steps:
       #Checkout principal, sem esse trecho o runner do ubuntu nao tem acesso ao codigo
       - name: Checkout
-      #Isso se trata de uma action, basicmante um componente reutilizavel para abstrair comandos
+        #Isso se trata de uma action, basicmante um componente reutilizavel para abstrair comandos
         uses: actions/checkout@v4 #Essa action permite o runner pegar o repositorio e deixa os arquivos disponiveis para os pŕoximos passos
 
       #Run serve para rodar um comando dentro do runner nesse job
@@ -35,12 +35,25 @@ jobs:
     runs-on:
       - ubuntu-latest
 
+    env:
+      APP_NAME: GitHubActionsPractice
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Message after List content
         run: echo "Hello World"
+
+      - name: List content
+        if: github.ref == 'refs/heads/main'
+        run: echo "$APP_NAME"
+
+      - name: Verify success
+        if: success()
+        run: echo "Build finally with success"
 
 
 
