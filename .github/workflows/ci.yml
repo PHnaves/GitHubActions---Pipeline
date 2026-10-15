@@ -1,63 +1,46 @@
-name: CI
 
-# QUANDO a pipeline roda
+name: CI BASIC
+
+#primeiro, configuramos o comando que ira dispararar a nossa pipe
 on:
+  #apenas push nesse primeiro caso
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:        # botao "Run workflow" na aba Actions
-
-# Cancela execucoes antigas da mesma branch quando voce da push de novo.
-# Evita fila de builds obsoletos consumindo minutos.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches:
+      - main
+    #quais arquivos modificados não iram disparar
+    paths-ignore:
+        - '**.md'
+        - '**.MD'
 
 jobs:
-  build:
-    name: Build e testes (Java ${{ matrix.java }})
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false            # se o 17 falhar, ainda quero ver o 21
-      matrix:
-        java: ['17', '21']
+  # nome do job
+  first-job:
+    #runner
+    runs-on:
+      - ubuntu-latest
 
     steps:
-      # 1. Sem isto o runner nao tem o seu codigo
+      #Checkout principal, sem esse trecho o runner do ubuntu nao tem acesso ao codigo
+      - name: Checkout
+      #Isso se trata de uma action, basicmante um componente reutilizavel para abstrair comandos
+        uses: actions/checkout@v4 #Essa action permite o runner pegar o repositorio e deixa os arquivos disponiveis para os pŕoximos passos
+
+      #Run serve para rodar um comando dentro do runner nesse job
+      - name: List content
+        run: ls
+
+  second-job:
+    needs: first-job
+
+    runs-on:
+      - ubuntu-latest
+
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Instala o JDK e ja configura o cache do ~/.m2
-      - name: Configurar JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java }}
-          cache: 'maven'
+      - name: Message after List content
+        run: echo "Hello World"
 
-      # 3. Compila e roda os testes.
-      #    -B = batch mode (log limpo, sem barra de progresso)
-      #    verify = compila + testa + empacota
-      - name: Build e testes
-        run: mvn -B verify
 
-      # 4. Guarda os relatorios de teste mesmo se o build falhar.
-      #    'if: always()' e o que faz esse step rodar apos uma falha.
-      - name: Publicar relatorios de teste
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: relatorios-teste-java-${{ matrix.java }}
-          path: target/surefire-reports/
-          retention-days: 7
 
-      # 5. Guarda o .jar apenas do build principal (evita artifact duplicado)
-      - name: Publicar o .jar
-        if: matrix.java == '17'
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: target/*.jar
-          retention-days: 7
