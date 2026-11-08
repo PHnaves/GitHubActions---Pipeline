@@ -42,7 +42,7 @@ jobs:
 
       # Run executa um comando diretamente no runner
       - name: List content
-        run: ls && ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
+        run: ls && ls -la ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
 
   # Nome identificador do segundo job
   second-job:
