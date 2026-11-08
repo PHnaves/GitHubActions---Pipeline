@@ -42,7 +42,7 @@ jobs:
 
       # Run executa um comando diretamente no runner
       - name: List content
-        .if: inputs.environment != 'null' # Condição para executar este step apenas se o input "environment" não for nulo
+        if: inputs.environment != '' # Condição para executar este step apenas se o input "environment" não for nulo
         run: ls && echo ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
 
   # Nome identificador do segundo job
