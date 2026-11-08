@@ -1,67 +1,110 @@
-
 name: CI BASIC
 
-#primeiro, configuramos o comando que ira dispararar a nossa pipe
+# Primeiro, configuramos o evento que irá disparar nossa pipeline
 on:
-  #apenas push nesse primeiro caso
+  # A pipeline será disparada apenas por push
   push:
+    # Define em qual branch o push deve acontecer
     branches:
       - main
-    #quais arquivos modificados não iram disparar
+
+    # Define quais arquivos, quando alterados isoladamente,
+    # não irão disparar a pipeline
     paths-ignore:
-        - '**.md'
-        - '**.MD'
+      - '**.md'
+      - '**.MD'
+
+    workflow_dispatch: # Permite disparar a pipeline manualmente na aba Actions
+      - name: Run workflow
+        inputs:
+          # Define um input chamado "environment" com valor padrão "production" que podemos utilizar em nossos jobs
+          environment:
+            description: 'Environment to deploy'
+            required: true
+            type: choice # Define que o input será do tipo escolha (choice) UI
+            options: # opções permitidas para o input "environment" no dropdown da UI
+              - production
+              - staging
+            default: 'production'
 
 jobs:
-  # nome do job
+  # Nome identificador do primeiro job
   first-job:
-    #runner
-    runs-on:
-      - ubuntu-latest
+    # Define o runner que irá executar os comandos deste job
+    # Cada job possui seu próprio runner
+    runs-on: ubuntu-latest
 
     steps:
-      #Checkout principal, sem esse trecho o runner do ubuntu nao tem acesso ao codigo
+      # Checkout é uma Action reutilizável que baixa o código
+      # do repositório e disponibiliza os arquivos no runner
       - name: Checkout
-        #Isso se trata de uma action, basicmante um componente reutilizavel para abstrair comandos
-        uses: actions/checkout@v4 #Essa action permite o runner pegar o repositorio e deixa os arquivos disponiveis para os pŕoximos passos
+        uses: actions/checkout@v4
 
-      #Run serve para rodar um comando dentro do runner nesse job
+      # Run executa um comando diretamente no runner
       - name: List content
-        run: ls
+        run: ls && ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
 
+  # Nome identificador do segundo job
   second-job:
+    # Define que este job depende da conclusão bem-sucedida
+    # do first-job antes de começar
     needs: first-job
 
-    runs-on:
-      - ubuntu-latest
+    # Define o sistema operacional do runner deste job
+    runs-on: ubuntu-latest
 
+    # Define variáveis de ambiente disponíveis em todos os steps
+    # deste job, salvo se forem sobrescritas
     env:
       APP_NAME: GitHubActionsPractice
 
     steps:
+      # Como cada job possui seu próprio runner,
+      # precisamos fazer o checkout novamente neste job
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
+        # With passa parâmetros de configuração para a Action
+        with:
+          # Define quantos commits recentes serão obtidos
+          # 2 permite consultar o commit atual e o anterior
+          fetch-depth: 2
+
+      # Executa um comando no terminal do runner
       - name: Message after List content
         run: echo "Hello World"
 
-      - name: Get last commit
+      # Consulta informações do commit atual do checkout
+      - name: Get current commit
         run: |
-          echo "Hash:"
+          # %H retorna o hash completo do commit
+          echo "Hash do commit atual:"
           git log -1 --format='%H'
 
-          echo "Títle:"
+          # %s retorna o título (subject) do commit
+          echo "Titulo do commit atual:"
           git log -1 --format='%s'
 
-      - name: List content
+      # Consulta informações do commit imediatamente anterior
+      - name: Get previous commit
+        run: |
+          # HEAD~1 representa o primeiro commit anterior ao atual
+          echo "Hash do commit anterior:"
+          git log -1 --format='%H' HEAD~1
+
+          # Retorna o título do commit anterior
+          echo "Titulo do commit anterior:"
+          git log -1 --format='%s' HEAD~1
+
+      # If define uma condição para executar ou pular um step
+      - name: Show application name
+        # github.ref contém a referência associada ao evento
+        # Esta condição verifica se a execução está na branch main
         if: github.ref == 'refs/heads/main'
         run: echo "$APP_NAME"
 
+      # success() verifica se os steps e as dependências
+      # anteriores foram concluídos com sucesso
       - name: Verify success
         if: success()
-        run: echo "Build finally with success"
-
-
-
+        run: echo "Build finished successfully"
