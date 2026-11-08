@@ -3,7 +3,7 @@ name: CI BASIC
 # Primeiro, configuramos o evento que irá disparar nossa pipeline
 on:
   # A pipeline será disparada apenas por push
-  push:
+  pull_request: #temporario apenas para nao rodar sozinha para teste do workflow_dispatch
     # Define em qual branch o push deve acontecer
     branches:
       - main
@@ -42,7 +42,8 @@ jobs:
 
       # Run executa um comando diretamente no runner
       - name: List content
-        run: ls && ls -la ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
+        .if: inputs.environment != 'null' # Condição para executar este step apenas se o input "environment" não for nulo
+        run: ls && echo ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
 
   # Nome identificador do segundo job
   second-job:
