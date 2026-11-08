@@ -14,20 +14,20 @@ on:
       - '**.md'
       - '**.MD'
 
-    workflow_dispatch: # Permite disparar a pipeline manualmente na aba Actions
-      - name: Run workflow
-        inputs:
-          # Define um input chamado "environment" com valor padrão "production" que podemos utilizar em nossos jobs
-          environment:
-            description: 'Environment to deploy'
-            required: true
-            # Define que o input será do tipo escolha (choice) UI
-            type: choice
-            # opções permitidas para o input "environment" no dropdown da UI
-            options:
-              - production
-              - staging
-            default: 'production'
+  workflow_dispatch: # Permite disparar a pipeline manualmente na aba Actions
+    - name: Run workflow
+      inputs:
+        # Define um input chamado "environment" com valor padrão "production" que podemos utilizar em nossos jobs
+        environment:
+          description: 'Environment to deploy'
+          required: true
+          # Define que o input será do tipo escolha (choice) UI
+          type: choice
+          # opções permitidas para o input "environment" no dropdown da UI
+          options:
+            - production
+            - staging
+          default: 'production'
 
 jobs:
   # Nome identificador do primeiro job
