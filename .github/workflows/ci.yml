@@ -21,8 +21,10 @@ on:
           environment:
             description: 'Environment to deploy'
             required: true
-            type: choice # Define que o input será do tipo escolha (choice) UI
-            options: # opções permitidas para o input "environment" no dropdown da UI
+            # Define que o input será do tipo escolha (choice) UI
+            type: choice
+            # opções permitidas para o input "environment" no dropdown da UI
+            options:
               - production
               - staging
             default: 'production'
