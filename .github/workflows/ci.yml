@@ -3,7 +3,7 @@ name: CI BASIC
 # Primeiro, configuramos o evento que irá disparar nossa pipeline
 on:
   # A pipeline será disparada apenas por push
-  pull_request: #temporario apenas para nao rodar sozinha para teste do workflow_dispatch
+  push:
     # Define em qual branch o push deve acontecer
     branches:
       - main
