@@ -28,6 +28,17 @@ on:
           - staging
         default: 'production'
 
+env:
+  # Define variáveis de ambiente globais para todos os jobs
+  # e steps da pipeline, salvo se forem sobrescritas
+  GLOBAL_VAR: 'This is a global variable'
+  JAVA_VERSION: '17'
+
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
   # Nome identificador do primeiro job
   first-job:
@@ -45,6 +56,9 @@ jobs:
       - name: List content
         if: inputs.environment != '' # Condição para executar este step apenas se o input "environment" não for nulo
         run: ls && echo ${{ inputs.environment }} # Exibe o conteúdo do diretório e o valor do input "environment"
+
+      - name: List global variables
+        run: echo ${{ env.GLOBAL_VAR }}
 
   # Nome identificador do segundo job
   second-job:
@@ -110,3 +124,22 @@ jobs:
       - name: Verify success
         if: success()
         run: echo "Build finished successfully"
+
+  test-job:
+    name: Build and Test
+    needs: [second-job, first-job] # Este job só será executado se os jobs first-job e second-job forem concluídos com sucesso
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+
+      - name: Run tests
+        run: mvn -B verify
