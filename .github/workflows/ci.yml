@@ -32,7 +32,6 @@ env:
   # Define variáveis de ambiente globais para todos os jobs
   # e steps da pipeline, salvo se forem sobrescritas
   GLOBAL_VAR: 'This is a global variable'
-  JAVA_VERSION: '17'
 
 
 concurrency:
@@ -130,6 +129,11 @@ jobs:
     #needs: [second-job, first-job] # Este job só será executado se os jobs first-job e second-job forem concluídos com sucesso
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false # tira o fail-fast para que seja testado as duas versoes do java mesmo que uma falhe
+      matrix:
+        java_version: ['17', '21'] # Define uma matriz de versões do Java para testar
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -138,8 +142,22 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ matrix.java_version }}
           cache: 'maven'
 
       - name: Run tests
         run: mvn -B verify
+
+      - name: Publish test reports
+        if: always() # Este step será executado mesmo que o build falhe
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-java-${{ matrix.java_version }}
+          path: target/surefire-reports/
+
+      - name : Publish the .jar
+        if: matrix.java_version == '17' # Este step será executado apenas para a versão 17 do Java
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/*.jar
