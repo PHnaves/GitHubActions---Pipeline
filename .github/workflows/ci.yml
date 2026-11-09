@@ -127,7 +127,7 @@ jobs:
 
   test-job:
     name: Build and Test
-    needs: [second-job, first-job] # Este job só será executado se os jobs first-job e second-job forem concluídos com sucesso
+    #needs: [second-job, first-job] # Este job só será executado se os jobs first-job e second-job forem concluídos com sucesso
     runs-on: ubuntu-latest
 
     steps:
